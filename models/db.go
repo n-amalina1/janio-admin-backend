@@ -1,6 +1,6 @@
 package models
 
-type GetOrderParams struct {
+type GetOrderDBParams struct {
 	OrderID              int     `json:"order_id"`
 	OrderLength          float64 `json:"order_length"`
 	OrderWidth           float64 `json:"order_width"`

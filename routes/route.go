@@ -20,7 +20,7 @@ func SetupRoutes(d *sql.DB) {
 }
 
 func getOrders(c *gin.Context) {
-	orders, err := api.GetAllOrdersDB(db)
+	orders, err := api.GetAllOrdersIDProvider(db)
 
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Orders not found"})
