@@ -5,10 +5,10 @@ import (
 	"database/sql"
 )
 
-func GetAllOrdersIDProvider(db *sql.DB) (models.IDProviderParams, error) {
+func GetOrdersIDProvider(db *sql.DB) (models.IDProviderOrdersParams, error) {
 	var (
-		IDProviderParams models.IDProviderParams
-		IDOrders         []models.IDOrder
+		IDProviderOrdersParams models.IDProviderOrdersParams
+		IDOrders               []models.IDOrder
 	)
 
 	orders, _ := GetAllOrdersDB(db)
@@ -16,11 +16,10 @@ func GetAllOrdersIDProvider(db *sql.DB) (models.IDProviderParams, error) {
 		IDOrder := FormatDbToID(db, order)
 		IDOrders = append(IDOrders, IDOrder)
 	}
-	
-	IDProviderParams.Orders = IDOrders
-	return IDProviderParams, nil
-}
 
+	IDProviderOrdersParams.Orders = IDOrders
+	return IDProviderOrdersParams, nil
+}
 
 func FormatDbToID(db *sql.DB, order models.GetOrderDBParams) models.IDOrder {
 	var IDOrder models.IDOrder

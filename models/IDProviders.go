@@ -1,6 +1,6 @@
 package models
 
-type IDProviderParams struct {
+type IDProviderOrdersParams struct {
 	Orders []IDOrder `json:"orders"`
 }
 
