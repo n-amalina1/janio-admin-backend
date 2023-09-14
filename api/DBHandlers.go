@@ -88,14 +88,7 @@ func FormatDbToAdmin(db *sql.DB, order models.GetOrderDBParams) models.AdminOrde
 	var adminItems []models.AdminItem
 	items, _ := GetItemDB(db)
 	for _, item := range items {
-		var adminItem models.AdminItem
-		adminItem.ItemID = item.ItemID
-		adminItem.ItemDescription = item.ItemDescription
-		adminItem.ItemCategory = item.ItemCategory
-		adminItem.ItemSku = item.ItemSku
-		adminItem.ItemQuantity = item.ItemQuantity
-		adminItem.ItemPrice = item.ItemPrice
-		adminItem.ItemCurrency = item.ItemCurrency
+		adminItem := models.AdminItem{ItemID: item.ItemID, ItemDescription: item.ItemDescription, ItemCategory: item.ItemCategory, ItemSku: item.ItemSku, ItemQuantity: item.ItemQuantity, ItemPrice: item.ItemPrice, ItemCurrency: item.ItemCurrency}
 		adminItems = append(adminItems, adminItem)
 	}
 

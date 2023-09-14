@@ -17,6 +17,7 @@ func SetupRoutes(d *sql.DB) {
 	router.GET("admin/orders", GetOrdersAdmin)
 
 	router.GET("id/orders", GetOrdersIDProvider)
+	router.GET("my/orders", GetOrdersMYProvider)
 
 	router.Run("localhost:8080")
 }
@@ -32,6 +33,15 @@ func GetOrdersAdmin(c *gin.Context) {
 
 func GetOrdersIDProvider(c *gin.Context) {
 	orders, err := api.GetOrdersIDProvider(db)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Orders not found"})
+	}
+	c.IndentedJSON(http.StatusOK, orders)
+}
+
+func GetOrdersMYProvider(c *gin.Context) {
+	orders, err := api.GetOrdersMYProvider(db)
 
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Orders not found"})

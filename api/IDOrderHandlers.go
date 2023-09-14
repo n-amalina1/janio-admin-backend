@@ -49,14 +49,7 @@ func FormatDbToID(db *sql.DB, order models.GetOrderDBParams) models.IDOrder {
 	var IDItems []models.IDItem
 	items, _ := GetItemDB(db)
 	for _, item := range items {
-		var IDItem models.IDItem
-		IDItem.ItemID = item.ItemID
-		IDItem.ItemDescription = item.ItemDescription
-		IDItem.ItemCategory = item.ItemCategory
-		IDItem.ItemSku = item.ItemSku
-		IDItem.ItemQuantity = item.ItemQuantity
-		IDItem.ItemPrice = item.ItemPrice
-		IDItem.ItemCurrency = item.ItemCurrency
+		IDItem := models.IDItem{ItemID: item.ItemID, ItemDescription: item.ItemDescription, ItemCategory: item.ItemCategory, ItemSku: item.ItemSku, ItemQuantity: item.ItemQuantity, ItemPrice: item.ItemPrice, ItemCurrency: item.ItemCurrency}
 		IDItems = append(IDItems, IDItem)
 	}
 
