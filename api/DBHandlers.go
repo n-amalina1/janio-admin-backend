@@ -33,65 +33,85 @@ func GetAllOrdersDB(db *sql.DB) ([]models.GetOrderDBParams, error) {
 	return orders, nil
 }
 
-func GetItemDB(db *sql.DB) ([]models.ItemDBParams, error) {
+func UpdateOrderDB(db *sql.DB, order *models.UpdateAdminOrder) (*models.UpdateAdminOrder, error) {
+	_, errO := db.Exec("UPDATE orders SET order_length=?, order_width=?, order_height=?, order_weight=?, order_status=? WHERE order_id=?", order.OrderLength, order.OrderWidth, order.OrderHeight, order.OrderWeight, order.OrderStatus, order.OrderID)
+	if errO != nil {
+		return nil, fmt.Errorf("Update Order DB: %s", errO.Error())
+	}
+
+	_, errC := db.Exec("UPDATE consignee SET consignee_name=?, consignee_phone_number=?, consignee_country=?, consignee_address=?, consignee_postal=?, consignee_state=?, consignee_city=?, consignee_province=?, consignee_email=? WHERE consignee_id=?", order.Consignee.ConsigneeName, order.Consignee.ConsigneePhoneNumber, order.Consignee.ConsigneeCountry, order.Consignee.ConsigneeAddress, order.Consignee.ConsigneePostal, order.Consignee.ConsigneeState, order.Consignee.ConsigneeCity, order.Consignee.ConsigneeProvince, order.Consignee.ConsigneeEmail, order.Consignee.ConsigneeID)
+	if errC != nil {
+		return nil, fmt.Errorf("Update Order Consignee DB: %s", errC.Error())
+	}
+
+	_, errP := db.Exec("UPDATE orders SET pickup_name=?, pickup_phone_number=?, pickup_country=?, pickup_address=?, pickup_postal=?, pickup_state=?, pickup_city=?, pickup_province=? WHERE pickup_id=?", order.Pickup.PickupName, order.Pickup.PickupPhoneNumber, order.Pickup.PickupCountry, order.Pickup.PickupAddress, order.Pickup.PickupPostal, order.Pickup.PickupState, order.Pickup.PickupCity, order.Pickup.PickupProvince, order.Pickup.PickupID)
+	if errP != nil {
+		return nil, fmt.Errorf("Update Order Pickup DB: %s", errP.Error())
+	}
+
+	return order, nil
+}
+
+func PostOrderDB(db *sql.DB, newOrder *models.PostAdminOrder) (*models.PostAdminOrder, error) {
+	order := *newOrder
+	resC, errC := db.Exec("INSERT INTO consignee (consignee_name, consignee_phone_number, consignee_country, consignee_address, consignee_postal, consignee_state, consignee_city, consignee_province, consignee_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", order.Consignee.ConsigneeName, order.Consignee.ConsigneePhoneNumber, order.Consignee.ConsigneeCountry, order.Consignee.ConsigneeAddress, order.Consignee.ConsigneePostal, order.Consignee.ConsigneeState, order.Consignee.ConsigneeCity, order.Consignee.ConsigneeProvince, order.Consignee.ConsigneeEmail)
+	if errC != nil {
+		return nil, fmt.Errorf("Post Order Consignee DB: %s", errC.Error())
+	}
+	idC, _ := resC.LastInsertId()
+
+	resP, errP := db.Exec("INSERT INTO pickup (pickup_name, pickup_phone_number, pickup_country, pickup_address, pickup_postal, pickup_state, pickup_city, pickup_province) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", order.Pickup.PickupName, order.Pickup.PickupPhoneNumber, order.Pickup.PickupCountry, order.Pickup.PickupAddress, order.Pickup.PickupPostal, order.Pickup.PickupState, order.Pickup.PickupCity, order.Pickup.PickupProvince)
+	if errP != nil {
+		return nil, fmt.Errorf("Post Order Pickup DB: %s", errP.Error())
+	}
+	idP, _ := resP.LastInsertId()
+
+	resO, errO := db.Exec("INSERT INTO orders (order_length, order_width, order_height, order_weight, order_status, order_consignee_id, order_pickup_id) VALUES (?, ?, ?, ?, ?, ?, ?)", order.OrderLength, order.OrderWidth, order.OrderHeight, order.OrderWeight, order.OrderStatus, idC, idP)
+	if errO != nil {
+		return nil, fmt.Errorf("Post Order DB: %s", errO.Error())
+	}
+	idO, _ := resO.LastInsertId()
+
+	for _, idI := range order.ItemIds {
+		_, errI := db.Exec("INSERT INTO item_order (io_item_id, io_order_id) VALUES (?, ?)", idI, idO)
+		if errI != nil {
+			return nil, fmt.Errorf("Post Order DB: %s", errI.Error())
+		}
+	}
+
+	return newOrder, nil
+}
+
+func DeleteOrderDB(db *sql.DB, orderId int) (int, error) {
+	_, errIO := db.Exec("DELETE FROM item_order WHERE io_order_id = ?", orderId)
+	if errIO != nil {
+		return 0, fmt.Errorf("Delete Order DB: %v", errIO)
+	}
+
+	_, errO := db.Exec("DELETE FROM orders WHERE order_id = ?", orderId)
+	if errO != nil {
+		return 0, fmt.Errorf("Delete Order DB: %v", errO)
+	}
+
+	return orderId, nil
+}
+
+func GetItemDB(db *sql.DB, orderId int) ([]models.ItemOrderDBParams, error) {
 	var (
-		items []models.ItemDBParams
+		itemOrders []models.ItemOrderDBParams
 	)
-	rows, err := db.Query("SELECT * FROM item")
+	rows, err := db.Query("SELECT * FROM item_order JOIN item ON item_order.io_item_id = item.item_id  WHERE io_order_id = ? ", orderId)
 	if err != nil {
-		return nil, fmt.Errorf("Get All Orders Items DB: %v", err)
+		return nil, fmt.Errorf("Get All Item Orders DB: %v", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var item models.ItemDBParams
+		var itemOrder models.ItemOrderDBParams
 
-		if err := rows.Scan(&item.ItemID, &item.ItemDescription, &item.ItemCategory, &item.ItemSku, &item.ItemQuantity, &item.ItemPrice, &item.ItemCurrency, &item.ItemOrderID); err != nil {
-			return nil, fmt.Errorf("Get All Orders Items DB: %v", err)
+		if err := rows.Scan(&itemOrder.IOItemID, &itemOrder.IOOrderID, &itemOrder.ItemID, &itemOrder.ItemDescription, &itemOrder.ItemCategory, &itemOrder.ItemSku, &itemOrder.ItemQuantity, &itemOrder.ItemPrice, &itemOrder.ItemCurrency); err != nil {
+			return nil, fmt.Errorf("Get All Items Orders DB: %v", err)
 		}
-		items = append(items, item)
+		itemOrders = append(itemOrders, itemOrder)
 	}
-	return items, nil
-}
-
-func GetOrdersAdmin(db *sql.DB) (models.AdminOrdersParams, error) {
-	var (
-		adminOrdersParams models.AdminOrdersParams
-		adminOrders       []models.AdminOrder
-	)
-
-	orders, _ := GetAllOrdersDB(db)
-	for _, order := range orders {
-		adminOrder := FormatDbToAdmin(db, order)
-		adminOrders = append(adminOrders, adminOrder)
-	}
-
-	adminOrdersParams.Orders = adminOrders
-	return adminOrdersParams, nil
-}
-
-func FormatDbToAdmin(db *sql.DB, order models.GetOrderDBParams) models.AdminOrder {
-	var adminOrder models.AdminOrder
-
-	adminOrder.OrderID = order.OrderID
-	adminOrder.OrderLength = order.OrderLength
-	adminOrder.OrderWidth = order.OrderWidth
-	adminOrder.OrderHeight = order.OrderHeight
-	adminOrder.OrderWeight = order.OrderWeight
-	adminOrder.OrderStatus = order.OrderStatus
-
-	adminConsignee := models.Consignee{ConsigneeID: order.ConsigneeID, ConsigneeName: order.ConsigneeName, ConsigneePhoneNumber: order.ConsigneePhoneNumber, ConsigneeCountry: order.ConsigneeCountry, ConsigneeAddress: order.ConsigneeAddress, ConsigneePostal: order.ConsigneePostal, ConsigneeState: order.ConsigneeState, ConsigneeCity: order.ConsigneeCity, ConsigneeProvince: order.ConsigneeProvince, ConsigneeEmail: order.ConsigneeEmail}
-	adminOrder.Consignee = adminConsignee
-
-	adminPickup := models.Pickup{PickupID: order.PickupID, PickupName: order.PickupName, PickupPhoneNumber: order.PickupPhoneNumber, PickupCountry: order.PickupCountry, PickupAddress: order.PickupAddress, PickupPostal: order.PickupPostal, PickupState: order.PickupState, PickupCity: order.PickupCity, PickupProvince: order.PickupProvince}
-	adminOrder.Pickup = adminPickup
-
-	var adminItems []models.AdminItem
-	items, _ := GetItemDB(db)
-	for _, item := range items {
-		adminItem := models.AdminItem{ItemID: item.ItemID, ItemDescription: item.ItemDescription, ItemCategory: item.ItemCategory, ItemSku: item.ItemSku, ItemQuantity: item.ItemQuantity, ItemPrice: item.ItemPrice, ItemCurrency: item.ItemCurrency}
-		adminItems = append(adminItems, adminItem)
-	}
-
-	adminOrder.Items = adminItems
-	return adminOrder
+	return itemOrders, nil
 }

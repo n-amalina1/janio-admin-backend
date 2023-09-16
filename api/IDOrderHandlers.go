@@ -3,6 +3,7 @@ package api
 import (
 	models "backend/models"
 	"database/sql"
+	"fmt"
 )
 
 func GetOrdersIDProvider(db *sql.DB) (models.IDProviderOrdersParams, error) {
@@ -14,6 +15,7 @@ func GetOrdersIDProvider(db *sql.DB) (models.IDProviderOrdersParams, error) {
 	orders, _ := GetAllOrdersDB(db)
 	for _, order := range orders {
 		IDOrder := FormatDbToID(db, order)
+
 		IDOrders = append(IDOrders, IDOrder)
 	}
 
@@ -47,12 +49,16 @@ func FormatDbToID(db *sql.DB, order models.GetOrderDBParams) models.IDOrder {
 	IDOrder.PickupProvince = order.PickupProvince
 
 	var IDItems []models.IDItem
-	items, _ := GetItemDB(db)
-	for _, item := range items {
-		IDItem := models.IDItem{ItemID: item.ItemID, ItemDescription: item.ItemDescription, ItemCategory: item.ItemCategory, ItemSku: item.ItemSku, ItemQuantity: item.ItemQuantity, ItemPrice: item.ItemPrice, ItemCurrency: item.ItemCurrency}
-		IDItems = append(IDItems, IDItem)
+	itemOrders, err := GetItemDB(db, order.OrderID)
+	if err != nil {
+		fmt.Printf("Get Item Orders DB: %v", err)
 	}
+	for _, itemOrder := range itemOrders {
+		IDItem := models.IDItem{ItemID: itemOrder.ItemID, ItemDescription: itemOrder.ItemDescription, ItemCategory: itemOrder.ItemCategory, ItemSku: itemOrder.ItemSku, ItemQuantity: itemOrder.ItemQuantity, ItemPrice: itemOrder.ItemPrice, ItemCurrency: itemOrder.ItemCurrency}
+		IDItems = append(IDItems, IDItem)
 
+	}
 	IDOrder.Items = IDItems
+
 	return IDOrder
 }

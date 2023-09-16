@@ -3,6 +3,7 @@ package api
 import (
 	models "backend/models"
 	"database/sql"
+	"fmt"
 )
 
 func GetOrdersMYProvider(db *sql.DB) (models.MYProviderOrdersParams, error) {
@@ -33,9 +34,12 @@ func FormatDbToMY(db *sql.DB, order models.GetOrderDBParams) models.MYOrder {
 	MYOrder.OrderDetails = MYOrderDetails
 
 	var MYItems []models.MYItem
-	items, _ := GetItemDB(db)
-	for _, item := range items {
-		MYItem := models.MYItem{ItemID: item.ItemID, ItemDescription: item.ItemDescription, ItemCategory: item.ItemCategory, ItemSku: item.ItemSku, ItemQuantity: item.ItemQuantity, ItemPrice: item.ItemPrice, ItemCurrency: item.ItemCurrency}
+	itemOrders, err := GetItemDB(db, order.OrderID)
+	if err != nil {
+		fmt.Printf("Get Item Orders DB: %v", err)
+	}
+	for _, itemOrder := range itemOrders {
+		MYItem := models.MYItem{ItemID: itemOrder.ItemID, ItemDescription: itemOrder.ItemDescription, ItemCategory: itemOrder.ItemCategory, ItemSku: itemOrder.ItemSku, ItemQuantity: itemOrder.ItemQuantity, ItemPrice: itemOrder.ItemPrice, ItemCurrency: itemOrder.ItemCurrency}
 		MYItems = append(MYItems, MYItem)
 	}
 

@@ -38,7 +38,18 @@ type ItemDBParams struct {
 	ItemQuantity    int     `json:"item_quantity"`
 	ItemPrice       float64 `json:"item_price"`
 	ItemCurrency    string  `json:"item_currency"`
-	ItemOrderID     int     `json:"item_order_id"`
+}
+
+type ItemOrderDBParams struct {
+	IOItemID        int     `json:"io_item_id"`
+	IOOrderID       int     `json:"io_order_id"`
+	ItemID          int     `json:"item_id"`
+	ItemDescription string  `json:"item_desc"`
+	ItemCategory    string  `json:"item_category"`
+	ItemSku         string  `json:"item_sku"`
+	ItemQuantity    int     `json:"item_quantity"`
+	ItemPrice       float64 `json:"item_price"`
+	ItemCurrency    string  `json:"item_currency"`
 }
 
 type User struct {
@@ -90,5 +101,4 @@ type Item struct {
 	ItemQuantity    int     `json:"item_quantity"`
 	ItemPrice       float64 `json:"item_price"`
 	ItemCurrency    string  `json:"item_currency"`
-	ItemOrderID     int     `json:"item_order_id"`
 }
