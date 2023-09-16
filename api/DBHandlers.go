@@ -82,6 +82,50 @@ func PostOrderDB(db *sql.DB, newOrder *models.PostAdminOrder) (*models.PostAdmin
 	return newOrder, nil
 }
 
+func PostOrdersClientToDb(db *sql.DB, order models.ClientToDBOrder) (models.ClientToDBOrder, error) {
+
+	resC, errC := db.Exec("INSERT INTO consignee (consignee_name, consignee_phone_number, consignee_country, consignee_address, consignee_postal, consignee_state, consignee_city, consignee_province, consignee_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", order.Consignee.ConsigneeName, order.Consignee.ConsigneePhoneNumber, order.Consignee.ConsigneeCountry, order.Consignee.ConsigneeAddress, order.Consignee.ConsigneePostal, order.Consignee.ConsigneeState, order.Consignee.ConsigneeCity, order.Consignee.ConsigneeProvince, order.Consignee.ConsigneeEmail)
+	if errC != nil {
+		return models.ClientToDBOrder{}, fmt.Errorf("Post Order Consignee DB: %s", errC.Error())
+	}
+	idC, _ := resC.LastInsertId()
+
+	resP, errP := db.Exec("INSERT INTO pickup (pickup_name, pickup_phone_number, pickup_country, pickup_address, pickup_postal, pickup_state, pickup_city, pickup_province) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", order.Pickup.PickupName, order.Pickup.PickupPhoneNumber, order.Pickup.PickupCountry, order.Pickup.PickupAddress, order.Pickup.PickupPostal, order.Pickup.PickupState, order.Pickup.PickupCity, order.Pickup.PickupProvince)
+	if errP != nil {
+		return models.ClientToDBOrder{}, fmt.Errorf("Post Order Pickup DB: %s", errP.Error())
+	}
+	idP, _ := resP.LastInsertId()
+
+	resO, errO := db.Exec("INSERT INTO orders (order_length, order_width, order_height, order_weight, order_status, order_consignee_id, order_pickup_id) VALUES (?, ?, ?, ?, ?, ?, ?)", order.OrderLength, order.OrderWidth, order.OrderHeight, order.OrderWeight, order.OrderStatus, idC, idP)
+	if errO != nil {
+		return models.ClientToDBOrder{}, fmt.Errorf("Post Order DB: %s", errO.Error())
+	}
+	idO, _ := resO.LastInsertId()
+
+	for _, i := range order.Items {
+		resI, errI := db.Exec("SELECT item_id FROM item WHERE item_desc=? AND item_category=? AND item_sku=? AND item_quantity=? AND item_price=? AND item_currency=?", i.ItemDescription, i.ItemCategory, i.ItemSku, i.ItemQuantity, i.ItemPrice, i.ItemCurrency)
+		if errI != nil {
+			return models.ClientToDBOrder{}, fmt.Errorf("Post Order Item DB: %s", errI.Error())
+		}
+
+		idI, _ := resI.LastInsertId()
+
+		if idI == 0 {
+			resI, errI := db.Exec("INSERT INTO item (item_desc, item_category, item_sku, item_quantity, item_price, item_currency) VALUES (?, ?, ?, ?, ?, ?)", i.ItemDescription, i.ItemCategory, i.ItemSku, i.ItemQuantity, i.ItemPrice, i.ItemCurrency)
+			if errI != nil {
+				return models.ClientToDBOrder{}, fmt.Errorf("Post Order Item DB: %s", errI.Error())
+			}
+			idI, _ = resI.LastInsertId()
+		}
+
+		_, errIO := db.Exec("INSERT INTO item_order (io_item_id, io_order_id) VALUES (?, ?)", idI, idO)
+		if errIO != nil {
+			return models.ClientToDBOrder{}, fmt.Errorf("Post Order Item DB: %s", errIO.Error())
+		}
+	}
+	return order, nil
+}
+
 func DeleteOrderDB(db *sql.DB, orderId int) (int, error) {
 	_, errIO := db.Exec("DELETE FROM item_order WHERE io_order_id = ?", orderId)
 	if errIO != nil {

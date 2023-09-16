@@ -15,6 +15,8 @@ var db *sql.DB
 func SetupRoutes(d *sql.DB) {
 	db = d
 	router := gin.Default()
+	router.POST("client/orders", PostOrdersClient)
+
 	router.GET("admin/orders", GetOrdersAdmin)
 	router.PUT("admin/order", UpdateOrderAdmin)
 	router.POST("admin/order", PostOrderAdmin)
@@ -24,6 +26,11 @@ func SetupRoutes(d *sql.DB) {
 	router.GET("my/orders", GetOrdersMYProvider)
 
 	router.Run("localhost:8080")
+}
+
+func PostOrdersClient(c *gin.Context) {
+	orders := api.PostOrdersClient(db)
+	c.IndentedJSON(http.StatusOK, orders)
 }
 
 func GetOrdersAdmin(c *gin.Context) {

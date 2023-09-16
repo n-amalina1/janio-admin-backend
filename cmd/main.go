@@ -15,4 +15,5 @@ func init() {
 
 func main() {
 	routes.SetupRoutes(db)
+
 }
