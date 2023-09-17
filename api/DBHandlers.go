@@ -51,6 +51,7 @@ func UpdateOrderDB(db *sql.DB, order *models.UpdateAdminOrder) (models.UpdateAdm
 	}
 
 	for _, i := range order.Items {
+		fmt.Printf("%+v", i)
 		var exists bool
 		row := db.QueryRow("SELECT EXISTS(SELECT 1 FROM item WHERE item_desc=? AND item_category=? AND item_sku=? AND item_quantity=? AND item_price=? AND item_currency=?", i.ItemDescription, i.ItemCategory, i.ItemSku, i.ItemQuantity, i.ItemPrice, i.ItemCurrency)
 		if err := row.Scan(&exists); err == sql.ErrNoRows {
