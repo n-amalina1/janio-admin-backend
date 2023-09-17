@@ -16,14 +16,15 @@ type AdminOrder struct {
 }
 
 type UpdateAdminOrder struct {
-	OrderID     int       `json:"order_id"`
-	OrderLength float64   `json:"order_length"`
-	OrderWidth  float64   `json:"order_width"`
-	OrderHeight float64   `json:"order_height"`
-	OrderWeight float64   `json:"order_weight"`
-	OrderStatus string    `json:"order_status"`
-	Consignee   Consignee `json:"consignee"`
-	Pickup      Pickup    `json:"pickup"`
+	OrderID     int         `json:"order_id"`
+	OrderLength float64     `json:"order_length"`
+	OrderWidth  float64     `json:"order_width"`
+	OrderHeight float64     `json:"order_height"`
+	OrderWeight float64     `json:"order_weight"`
+	OrderStatus string      `json:"order_status"`
+	Consignee   Consignee   `json:"consignee"`
+	Pickup      Pickup      `json:"pickup"`
+	Items       []AdminItem `json:"items"`
 }
 
 type PostAdminOrder struct {

@@ -2,7 +2,6 @@ package routes
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 
 	api "backend/api"
@@ -69,7 +68,6 @@ func UpdateOrderAdmin(c *gin.Context) {
 	}
 
 	order, err := api.UpdateOrderAdmin(db, &updatedOrder)
-	fmt.Printf("Order %+v", updatedOrder)
 
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})

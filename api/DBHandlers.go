@@ -50,6 +50,21 @@ func UpdateOrderDB(db *sql.DB, order *models.UpdateAdminOrder) (models.UpdateAdm
 		return models.UpdateAdminOrder{}, fmt.Errorf("Update Order Pickup DB: %s", errP.Error())
 	}
 
+	for _, i := range order.Items {
+		var exists bool
+		row := db.QueryRow("SELECT EXISTS(SELECT 1 FROM item WHERE item_desc=? AND item_category=? AND item_sku=? AND item_quantity=? AND item_price=? AND item_currency=?", i.ItemDescription, i.ItemCategory, i.ItemSku, i.ItemQuantity, i.ItemPrice, i.ItemCurrency)
+		if err := row.Scan(&exists); err == sql.ErrNoRows {
+			if _, err := db.Exec("INSERT INTO item (item_desc, item_category, item_sku, item_quantity, item_price, item_currency) VALUES (?, ?, ?, ?, ?, ?)", i.ItemDescription, i.ItemCategory, i.ItemSku, i.ItemQuantity, i.ItemPrice, i.ItemCurrency); err != nil {
+				return models.UpdateAdminOrder{}, fmt.Errorf("Update Order Item DB: %s", err.Error())
+			}
+		} else {
+			_, errI := db.Exec("UPDATE item SET item_desc=?, item_category=?, item_sku=?, item_quantity=?, item_price=?, item_currency=? WHERE item_id=?", i.ItemDescription, i.ItemCategory, i.ItemSku, i.ItemQuantity, i.ItemPrice, i.ItemCurrency, i.ItemID)
+			if errI != nil {
+				return models.UpdateAdminOrder{}, fmt.Errorf("Update Order Item DB: %s", errI.Error())
+			}
+		}
+	}
+
 	return *order, nil
 }
 
