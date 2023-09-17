@@ -2,6 +2,7 @@ package routes
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 
 	api "backend/api"
@@ -15,6 +16,8 @@ var db *sql.DB
 func SetupRoutes(d *sql.DB) {
 	db = d
 	router := gin.Default()
+	router.Use(CORSMiddleware())
+
 	router.POST("client/orders", PostOrdersClient)
 
 	router.GET("admin/orders", GetOrdersAdmin)
@@ -26,6 +29,22 @@ func SetupRoutes(d *sql.DB) {
 	router.GET("my/orders", GetOrdersMYProvider)
 
 	router.Run("localhost:8080")
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Origin, Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(200)
+		} else {
+			c.Next()
+		}
+	}
 }
 
 func PostOrdersClient(c *gin.Context) {
@@ -50,9 +69,10 @@ func UpdateOrderAdmin(c *gin.Context) {
 	}
 
 	order, err := api.UpdateOrderAdmin(db, &updatedOrder)
+	fmt.Printf("Order %+v", updatedOrder)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	} else {
 		c.IndentedJSON(http.StatusOK, gin.H{"data": order})
 	}

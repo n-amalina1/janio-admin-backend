@@ -33,23 +33,24 @@ func GetAllOrdersDB(db *sql.DB) ([]models.GetOrderDBParams, error) {
 	return orders, nil
 }
 
-func UpdateOrderDB(db *sql.DB, order *models.UpdateAdminOrder) (*models.UpdateAdminOrder, error) {
+func UpdateOrderDB(db *sql.DB, order *models.UpdateAdminOrder) (models.UpdateAdminOrder, error) {
+
 	_, errO := db.Exec("UPDATE orders SET order_length=?, order_width=?, order_height=?, order_weight=?, order_status=? WHERE order_id=?", order.OrderLength, order.OrderWidth, order.OrderHeight, order.OrderWeight, order.OrderStatus, order.OrderID)
 	if errO != nil {
-		return nil, fmt.Errorf("Update Order DB: %s", errO.Error())
+		return models.UpdateAdminOrder{}, fmt.Errorf("Update Order DB: %s", errO.Error())
 	}
 
 	_, errC := db.Exec("UPDATE consignee SET consignee_name=?, consignee_phone_number=?, consignee_country=?, consignee_address=?, consignee_postal=?, consignee_state=?, consignee_city=?, consignee_province=?, consignee_email=? WHERE consignee_id=?", order.Consignee.ConsigneeName, order.Consignee.ConsigneePhoneNumber, order.Consignee.ConsigneeCountry, order.Consignee.ConsigneeAddress, order.Consignee.ConsigneePostal, order.Consignee.ConsigneeState, order.Consignee.ConsigneeCity, order.Consignee.ConsigneeProvince, order.Consignee.ConsigneeEmail, order.Consignee.ConsigneeID)
 	if errC != nil {
-		return nil, fmt.Errorf("Update Order Consignee DB: %s", errC.Error())
+		return models.UpdateAdminOrder{}, fmt.Errorf("Update Order Consignee DB: %s", errC.Error())
 	}
 
-	_, errP := db.Exec("UPDATE orders SET pickup_name=?, pickup_phone_number=?, pickup_country=?, pickup_address=?, pickup_postal=?, pickup_state=?, pickup_city=?, pickup_province=? WHERE pickup_id=?", order.Pickup.PickupName, order.Pickup.PickupPhoneNumber, order.Pickup.PickupCountry, order.Pickup.PickupAddress, order.Pickup.PickupPostal, order.Pickup.PickupState, order.Pickup.PickupCity, order.Pickup.PickupProvince, order.Pickup.PickupID)
+	_, errP := db.Exec("UPDATE pickup SET pickup_name=?, pickup_phone_number=?, pickup_country=?, pickup_address=?, pickup_postal=?, pickup_state=?, pickup_city=?, pickup_province=? WHERE pickup_id=?", order.Pickup.PickupName, order.Pickup.PickupPhoneNumber, order.Pickup.PickupCountry, order.Pickup.PickupAddress, order.Pickup.PickupPostal, order.Pickup.PickupState, order.Pickup.PickupCity, order.Pickup.PickupProvince, order.Pickup.PickupID)
 	if errP != nil {
-		return nil, fmt.Errorf("Update Order Pickup DB: %s", errP.Error())
+		return models.UpdateAdminOrder{}, fmt.Errorf("Update Order Pickup DB: %s", errP.Error())
 	}
 
-	return order, nil
+	return *order, nil
 }
 
 func PostOrderDB(db *sql.DB, newOrder *models.PostAdminOrder) (*models.PostAdminOrder, error) {

@@ -22,7 +22,8 @@ func GetOrdersAdmin(db *sql.DB) (models.AdminOrdersParams, error) {
 	return adminOrdersParams, nil
 }
 
-func UpdateOrderAdmin(db *sql.DB, order *models.UpdateAdminOrder) (*models.UpdateAdminOrder, error) {
+func UpdateOrderAdmin(db *sql.DB, order *models.UpdateAdminOrder) (models.UpdateAdminOrder, error) {
+
 	updatedOrder, err := UpdateOrderDB(db, order)
 
 	return updatedOrder, err
