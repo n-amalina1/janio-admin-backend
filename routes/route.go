@@ -87,7 +87,7 @@ func PostOrderAdmin(c *gin.Context) {
 	order, err := api.PostOrderAdmin(db, &newOrder)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	} else {
 		c.IndentedJSON(http.StatusCreated, gin.H{"data": order})
 	}
