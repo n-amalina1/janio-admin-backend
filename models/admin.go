@@ -38,7 +38,7 @@ type PostAdminOrder struct {
 	Items       []PostAdminItem    `json:"items"`
 }
 
-type DeletAdminOrder struct {
+type DeleteAdminOrder struct {
 	OrderID int `json:"orderId"`
 }
 

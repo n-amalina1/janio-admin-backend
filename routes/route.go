@@ -94,7 +94,7 @@ func PostOrderAdmin(c *gin.Context) {
 }
 
 func DeleteOrderAdmin(c *gin.Context) {
-	var orderId models.DeletAdminOrder
+	var orderId models.DeleteAdminOrder
 
 	if err := c.BindJSON(&orderId); err != nil {
 		return
@@ -103,7 +103,7 @@ func DeleteOrderAdmin(c *gin.Context) {
 	_, err := api.DeleteOrderAdmin(db, orderId.OrderID)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	} else {
 		c.IndentedJSON(http.StatusOK, gin.H{"orderId": orderId.OrderID})
 	}
