@@ -28,14 +28,14 @@ type UpdateAdminOrder struct {
 }
 
 type PostAdminOrder struct {
-	OrderLength float64            `json:"order_length"`
-	OrderWidth  float64            `json:"order_width"`
-	OrderHeight float64            `json:"order_height"`
-	OrderWeight float64            `json:"order_weight"`
+	OrderLength int                `json:"order_length"`
+	OrderWidth  int                `json:"order_width"`
+	OrderHeight int                `json:"order_height"`
+	OrderWeight int                `json:"order_weight"`
 	OrderStatus string             `json:"order_status"`
 	Consignee   PostAdminConsignee `json:"consignee"`
 	Pickup      PostAdminPickup    `json:"pickup"`
-	ItemIds     []int              `json:"item_ids"`
+	Items       []PostAdminItem    `json:"items"`
 }
 
 type DeletAdminOrder struct {
@@ -63,6 +63,15 @@ type PostAdminPickup struct {
 	PickupState       string `json:"pickup_state"`
 	PickupCity        string `json:"pickup_city"`
 	PickupProvince    string `json:"pickup_province"`
+}
+
+type PostAdminItem struct {
+	ItemDescription string  `json:"item_desc"`
+	ItemCategory    string  `json:"item_category"`
+	ItemSku         string  `json:"item_sku"`
+	ItemQuantity    int     `json:"item_quantity"`
+	ItemPrice       float64 `json:"item_price"`
+	ItemCurrency    string  `json:"item_currency"`
 }
 
 type AdminItem struct {

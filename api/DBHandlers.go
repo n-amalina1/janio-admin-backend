@@ -122,10 +122,27 @@ func PostOrderDB(db *sql.DB, newOrder *models.PostAdminOrder) (*models.PostAdmin
 	}
 	idO, _ := resO.LastInsertId()
 
-	for _, idI := range order.ItemIds {
-		_, errI := db.Exec("INSERT INTO item_order (io_item_id, io_order_id) VALUES (?, ?)", idI, idO)
-		if errI != nil {
-			return nil, fmt.Errorf("Post Order DB: %s", errI.Error())
+	for _, i := range order.Items {
+		var exists bool
+		var idI int64
+		row := db.QueryRow("SELECT EXISTS(SELECT 1 FROM item WHERE item_desc=? AND item_category=? AND item_sku=? AND item_quantity=? AND item_price=? AND item_currency=?", i.ItemDescription, i.ItemCategory, i.ItemSku, i.ItemQuantity, i.ItemPrice, i.ItemCurrency)
+		if err := row.Scan(&exists); err == sql.ErrNoRows {
+			if _, err := db.Exec("INSERT INTO item (item_desc, item_category, item_sku, item_quantity, item_price, item_currency) VALUES (?, ?, ?, ?, ?, ?)", i.ItemDescription, i.ItemCategory, i.ItemSku, i.ItemQuantity, i.ItemPrice, i.ItemCurrency); err != nil {
+				return nil, fmt.Errorf("Post Order Item DB: %s", err.Error())
+			}
+		} else {
+			resI, _ := db.Query("SELECT item_id FROM item WHERE item_desc=? AND item_category=? AND item_sku=? AND item_quantity=? AND item_price=? AND item_currency=?", i.ItemDescription, i.ItemCategory, i.ItemSku, i.ItemQuantity, i.ItemPrice, i.ItemCurrency)
+			for resI.Next() {
+				err = resI.Scan(&idI)
+				if err != nil {
+					return nil, fmt.Errorf("Post Order Pickup DB: %s", err.Error())
+				}
+			}
+			_, errIO := db.Exec("INSERT INTO item_order (io_item_id, io_order_id) VALUES (?, ?)", idI, idO)
+			if errIO != nil {
+				return nil, fmt.Errorf("Post Order Item DB: %s", errIO.Error())
+			}
+
 		}
 	}
 
