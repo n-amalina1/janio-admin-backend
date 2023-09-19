@@ -17,7 +17,7 @@ func SetupRoutes(d *sql.DB) {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
-	router.POST("client/orders", PostOrdersClient)
+	router.GET("client/orders", PostOrdersClient)
 
 	router.GET("admin/orders", GetOrdersAdmin)
 	router.PUT("admin/order", UpdateOrderAdmin)
