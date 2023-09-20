@@ -29,17 +29,16 @@ func GetClientNewOrders() []models.ClientOrder {
 	return order
 }
 
-func PostOrdersClient(db *sql.DB) []models.ClientToDBOrder {
-	orders := FormatClientToDB(GetClientNewOrders())
+func PostOrdersClient(db *sql.DB, orders *[]models.ClientToDBOrder) ([]models.ClientToDBOrder, error) {
 
-	for _, o := range orders {
+	for _, o := range *orders {
 		_, err := PostOrdersClientToDb(db, o)
 		if err != nil {
-			fmt.Printf("Post Client New Orders: %v", err.Error())
+			return []models.ClientToDBOrder{}, err
 		}
 	}
 
-	return orders
+	return *orders, nil
 }
 
 func FormatClientToDB(orders []models.ClientOrder) []models.ClientToDBOrder {
@@ -53,8 +52,8 @@ func FormatClientToDB(orders []models.ClientOrder) []models.ClientToDBOrder {
 		order.OrderHeight = o.OrderDetails.OrderHeight
 		order.OrderWeight = o.OrderDetails.OrderWeight
 		order.OrderStatus = "Pending"
-		order.Consignee = o.Address.ClientConsignee
-		order.Pickup = o.Address.ClientPickup
+		order.Consignee = o.Address.Consignee
+		order.Pickup = o.Address.Pickup
 		order.Items = o.Items
 
 		ordersC = append(ordersC, order)

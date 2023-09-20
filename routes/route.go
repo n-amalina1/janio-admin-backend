@@ -2,6 +2,7 @@ package routes
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 
 	api "backend/api"
@@ -23,7 +24,7 @@ func SetupRoutes(d *sql.DB) {
 		AllowCredentials: true,
 	}))
 
-	router.GET("client/orders", PostOrdersClient)
+	router.POST("client/orders", PostOrdersClient)
 
 	router.GET("admin/orders", GetOrdersAdmin)
 	router.PUT("admin/order", UpdateOrderAdmin)
@@ -53,7 +54,19 @@ func SetupRoutes(d *sql.DB) {
 }*/
 
 func PostOrdersClient(c *gin.Context) {
-	orders := api.PostOrdersClient(db)
+	var newOrders []models.ClientToDBOrder
+	if err := c.BindJSON(&newOrders); err != nil {
+		return
+	}
+	fmt.Println("%+v", newOrders)
+
+	orders, err := api.PostOrdersClient(db, &newOrders)
+	fmt.Println("%+v", orders)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	} else {
+		c.IndentedJSON(http.StatusCreated, gin.H{"data": orders})
+	}
 	c.IndentedJSON(http.StatusOK, orders)
 }
 

@@ -14,8 +14,8 @@ type OrderDetails struct {
 }
 
 type Address struct {
-	ClientConsignee ClientConsignee `json:"consignee"`
-	ClientPickup    ClientPickup    `json:"pickup"`
+	Consignee ClientConsignee `json:"consignee"`
+	Pickup    ClientPickup    `json:"pickup"`
 }
 
 type ClientConsignee struct {
