@@ -2,6 +2,7 @@ package routes
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -61,13 +62,15 @@ func PostOrdersClient(c *gin.Context) {
 		return
 	}
 
+	// fmt.Printf("%+v", newOrders)
+
 	orders, err := api.PostOrdersClient(db, &newOrders)
+	fmt.Printf("%+v", orders)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	} else {
 		c.IndentedJSON(http.StatusCreated, gin.H{"data": orders})
 	}
-	c.IndentedJSON(http.StatusOK, orders)
 }
 
 func GetOrdersAdmin(c *gin.Context) {

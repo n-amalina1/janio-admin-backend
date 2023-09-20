@@ -155,6 +155,14 @@ func PostOrdersClientToDb(db *sql.DB, order models.ClientToDBOrder) (models.Clie
 	var idC int64
 	rowC := db.QueryRow("SELECT EXISTS(SELECT 1 FROM consignee WHERE consignee_name=? AND  consignee_phone_number=? AND consignee_country=? AND consignee_address=? AND consignee_postal=? AND  consignee_state=? AND consignee_city=? AND consignee_province=? AND consignee_email=? ", order.Consignee.ConsigneeName, order.Consignee.ConsigneePhoneNumber, order.Consignee.ConsigneeCountry, order.Consignee.ConsigneeAddress, order.Consignee.ConsigneePostal, order.Consignee.ConsigneeState, order.Consignee.ConsigneeCity, order.Consignee.ConsigneeProvince, order.Consignee.ConsigneeEmail)
 	if err := rowC.Scan(&existsC); err == sql.ErrNoRows {
+		resC, errC := db.Exec("INSERT INTO consignee (consignee_name, consignee_phone_number, consignee_country, consignee_address, consignee_postal, consignee_state, consignee_city, consignee_province, consignee_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", order.Consignee.ConsigneeName, order.Consignee.ConsigneePhoneNumber, order.Consignee.ConsigneeCountry, order.Consignee.ConsigneeAddress, order.Consignee.ConsigneePostal, order.Consignee.ConsigneeState, order.Consignee.ConsigneeCity, order.Consignee.ConsigneeProvince, order.Consignee.ConsigneeEmail)
+		if errC != nil {
+			return models.ClientToDBOrder{}, fmt.Errorf("post Order Consignee DB: %s", errC.Error())
+		}
+		id, _ := resC.LastInsertId()
+		idC = id
+
+	} else {
 		resC, _ := db.Query("SELECT consignee_id FROM consignee WHERE consignee_name=? AND  consignee_phone_number=? AND consignee_country=? AND consignee_address=? AND consignee_postal=? AND  consignee_state=? AND consignee_city=? AND consignee_province=? AND consignee_email=? ", order.Consignee.ConsigneeName, order.Consignee.ConsigneePhoneNumber, order.Consignee.ConsigneeCountry, order.Consignee.ConsigneeAddress, order.Consignee.ConsigneePostal, order.Consignee.ConsigneeState, order.Consignee.ConsigneeCity, order.Consignee.ConsigneeProvince, order.Consignee.ConsigneeEmail)
 		for resC.Next() {
 			err = resC.Scan(&idC)
@@ -163,20 +171,20 @@ func PostOrdersClientToDb(db *sql.DB, order models.ClientToDBOrder) (models.Clie
 			}
 		}
 
-	} else {
-
-		resC, errC := db.Exec("INSERT INTO consignee (consignee_name, consignee_phone_number, consignee_country, consignee_address, consignee_postal, consignee_state, consignee_city, consignee_province, consignee_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", order.Consignee.ConsigneeName, order.Consignee.ConsigneePhoneNumber, order.Consignee.ConsigneeCountry, order.Consignee.ConsigneeAddress, order.Consignee.ConsigneePostal, order.Consignee.ConsigneeState, order.Consignee.ConsigneeCity, order.Consignee.ConsigneeProvince, order.Consignee.ConsigneeEmail)
-		if errC != nil {
-			return models.ClientToDBOrder{}, fmt.Errorf("post Order Consignee DB: %s", errC.Error())
-		}
-		id, _ := resC.LastInsertId()
-		idC = id
 	}
 
 	var existsP bool
 	var idP int64
 	rowP := db.QueryRow("SELECT EXISTS(SELECT 1 FROM pickup WHERE pickup_name=? AND pickup_phone_number=? AND pickup_country=? AND pickup_address=? AND pickup_postal=? AND pickup_state=? AND pickup_city=? AND pickup_province=?", order.Pickup.PickupName, order.Pickup.PickupPhoneNumber, order.Pickup.PickupCountry, order.Pickup.PickupAddress, order.Pickup.PickupPostal, order.Pickup.PickupState, order.Pickup.PickupCity, order.Pickup.PickupProvince)
 	if err := rowP.Scan(&existsP); err == sql.ErrNoRows {
+		resP, errP := db.Exec("INSERT INTO pickup (pickup_name, pickup_phone_number, pickup_country, pickup_address, pickup_postal, pickup_state, pickup_city, pickup_province) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", order.Pickup.PickupName, order.Pickup.PickupPhoneNumber, order.Pickup.PickupCountry, order.Pickup.PickupAddress, order.Pickup.PickupPostal, order.Pickup.PickupState, order.Pickup.PickupCity, order.Pickup.PickupProvince)
+		if errP != nil {
+			return models.ClientToDBOrder{}, fmt.Errorf("post Order Pickup DB: %s", errP.Error())
+		}
+		id, _ := resP.LastInsertId()
+		idP = id
+
+	} else {
 
 		resP, _ := db.Query("SELECT pickup_id FROM pickup WHERE pickup_name=? AND pickup_phone_number=? AND pickup_country=? AND pickup_address=? AND pickup_postal=? AND pickup_state=? AND pickup_city=? AND pickup_province=?", order.Pickup.PickupName, order.Pickup.PickupPhoneNumber, order.Pickup.PickupCountry, order.Pickup.PickupAddress, order.Pickup.PickupPostal, order.Pickup.PickupState, order.Pickup.PickupCity, order.Pickup.PickupProvince)
 		for resP.Next() {
@@ -185,14 +193,6 @@ func PostOrdersClientToDb(db *sql.DB, order models.ClientToDBOrder) (models.Clie
 				return models.ClientToDBOrder{}, fmt.Errorf("post Order Pickup DB: %s", err.Error())
 			}
 		}
-	} else {
-
-		resP, errP := db.Exec("INSERT INTO pickup (pickup_name, pickup_phone_number, pickup_country, pickup_address, pickup_postal, pickup_state, pickup_city, pickup_province) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", order.Pickup.PickupName, order.Pickup.PickupPhoneNumber, order.Pickup.PickupCountry, order.Pickup.PickupAddress, order.Pickup.PickupPostal, order.Pickup.PickupState, order.Pickup.PickupCity, order.Pickup.PickupProvince)
-		if errP != nil {
-			return models.ClientToDBOrder{}, fmt.Errorf("post Order Pickup DB: %s", errP.Error())
-		}
-		id, _ := resP.LastInsertId()
-		idP = id
 
 	}
 
