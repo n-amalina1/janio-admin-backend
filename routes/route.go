@@ -7,6 +7,7 @@ import (
 	api "backend/api"
 	"backend/models"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +16,12 @@ var db *sql.DB
 func SetupRoutes(d *sql.DB) {
 	db = d
 	router := gin.Default()
-	router.Use(CORSMiddleware())
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:8008"},
+		AllowMethods:     []string{"POST, GET, OPTIONS, PUT, DELETE, UPDATE"},
+		AllowHeaders:     []string{"Authorization", "Content-Type"},
+		AllowCredentials: true,
+	}))
 
 	router.GET("client/orders", PostOrdersClient)
 
@@ -30,7 +36,7 @@ func SetupRoutes(d *sql.DB) {
 	router.Run("localhost:8080")
 }
 
-func CORSMiddleware() gin.HandlerFunc {
+/*func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
@@ -44,7 +50,7 @@ func CORSMiddleware() gin.HandlerFunc {
 			c.Next()
 		}
 	}
-}
+}*/
 
 func PostOrdersClient(c *gin.Context) {
 	orders := api.PostOrdersClient(db)
