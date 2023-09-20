@@ -2,8 +2,8 @@ package routes
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
+	"time"
 
 	api "backend/api"
 	"backend/models"
@@ -20,8 +20,10 @@ func SetupRoutes(d *sql.DB) {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:8008"},
 		AllowMethods:     []string{"POST, GET, OPTIONS, PUT, DELETE, UPDATE"},
-		AllowHeaders:     []string{"Authorization", "Content-Type"},
+		AllowHeaders:     []string{"Content-Type", "Content-Length", "Accept-Encoding", "Authorization", "Cache-Control"},
+		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	}))
 
 	router.POST("client/orders", PostOrdersClient)
@@ -58,10 +60,8 @@ func PostOrdersClient(c *gin.Context) {
 	if err := c.BindJSON(&newOrders); err != nil {
 		return
 	}
-	fmt.Println("%+v", newOrders)
 
 	orders, err := api.PostOrdersClient(db, &newOrders)
-	fmt.Println("%+v", orders)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	} else {
