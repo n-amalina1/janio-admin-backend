@@ -39,3 +39,8 @@ type IDItem struct {
 	ItemPrice       float64 `json:"item_price_value"`
 	ItemCurrency    string  `json:"item_price_currency"`
 }
+
+type IDOrderStatus struct {
+	OrderID     int    `json:"order_id"`
+	OrderStatus string `json:"order_status"`
+}

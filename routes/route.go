@@ -2,6 +2,7 @@ package routes
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -18,7 +19,7 @@ func SetupRoutes(d *sql.DB) {
 	db = d
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:8008"},
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:8008", "http://localhost:8443"},
 		AllowMethods:     []string{"POST, GET, OPTIONS, PUT, DELETE, UPDATE"},
 		AllowHeaders:     []string{"Content-Type", "Content-Length", "Accept-Encoding", "Authorization", "Cache-Control"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -34,6 +35,8 @@ func SetupRoutes(d *sql.DB) {
 	router.DELETE("admin/order", DeleteOrderAdmin)
 
 	router.GET("id/orders", GetOrdersIDProvider)
+	router.PUT("id/order/update", PutStatusIDProvider)
+
 	router.GET("my/orders", GetOrdersMYProvider)
 
 	router.Run("localhost:8080")
@@ -118,6 +121,22 @@ func GetOrdersIDProvider(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Orders not found"})
 	}
 	c.IndentedJSON(http.StatusOK, orders)
+}
+
+func PutStatusIDProvider(c *gin.Context) {
+	var status models.IDOrderStatus
+
+	if err := c.BindJSON(&status); err != nil {
+		return
+	}
+	fmt.Println(status.OrderStatus)
+	orderStatus, errS := api.PostStatusIDProvider(db, status)
+	fmt.Println(orderStatus.OrderStatus)
+
+	if errS != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": errS.Error()})
+	}
+	c.IndentedJSON(http.StatusOK, orderStatus)
 }
 
 func GetOrdersMYProvider(c *gin.Context) {

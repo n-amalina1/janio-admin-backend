@@ -62,3 +62,11 @@ func FormatDbToID(db *sql.DB, order models.GetOrderDBParams) models.IDOrder {
 
 	return IDOrder
 }
+
+func PostStatusIDProvider(db *sql.DB, status models.IDOrderStatus) (models.IDOrderStatus, error) {
+	_, errS := UpdateStatusDB(db, status)
+	if errS != nil {
+		return models.IDOrderStatus{}, fmt.Errorf("update Status DB: %v", errS)
+	}
+	return status, nil
+}

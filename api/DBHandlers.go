@@ -269,3 +269,11 @@ func GetItemDB(db *sql.DB, orderId int) ([]models.ItemOrderDBParams, error) {
 	}
 	return itemOrders, nil
 }
+
+func UpdateStatusDB(db *sql.DB, status models.IDOrderStatus) (models.IDOrderStatus, error) {
+	_, errS := db.Exec("UPDATE orders SET order_status = ? WHERE order_id = ?", status.OrderStatus, status.OrderID)
+	if errS != nil {
+		return models.IDOrderStatus{}, fmt.Errorf("update Status DB: %v", errS)
+	}
+	return status, nil
+}
