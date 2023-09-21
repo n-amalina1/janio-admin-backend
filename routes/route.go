@@ -2,7 +2,6 @@ package routes
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -40,32 +39,13 @@ func SetupRoutes(d *sql.DB) {
 	router.Run("localhost:8080")
 }
 
-/*func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Origin, Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-		c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(200)
-		} else {
-			c.Next()
-		}
-	}
-}*/
-
 func PostOrdersClient(c *gin.Context) {
 	var newOrders []models.ClientToDBOrder
 	if err := c.BindJSON(&newOrders); err != nil {
 		return
 	}
 
-	// fmt.Printf("%+v", newOrders)
-
 	orders, err := api.PostOrdersClient(db, &newOrders)
-	fmt.Printf("%+v", orders)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	} else {
