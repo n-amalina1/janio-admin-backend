@@ -6,12 +6,19 @@ import (
 	"fmt"
 )
 
-func GetAllOrdersDB(db *sql.DB) ([]models.GetOrderDBParams, error) {
+func GetAllOrdersDB(db *sql.DB, country string) ([]models.GetOrderDBParams, error) {
 	var (
 		orders []models.GetOrderDBParams
+		query  string
 	)
 
-	rows, err := db.Query("SELECT * FROM orders JOIN consignee ON orders.order_consignee_id = consignee.consignee_id JOIN pickup ON orders.order_pickup_id = pickup.pickup_id")
+	if country == "Indonesia" || country == "Malaysia" {
+		query = fmt.Sprintf("SELECT * FROM orders JOIN consignee ON orders.order_consignee_id = consignee.consignee_id JOIN pickup ON orders.order_pickup_id = pickup.pickup_id WHERE consignee.consignee_country = \"%s\"", country)
+	} else {
+		query = "SELECT * FROM orders JOIN consignee ON orders.order_consignee_id = consignee.consignee_id JOIN pickup ON orders.order_pickup_id = pickup.pickup_id"
+	}
+
+	rows, err := db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("get All Orders DB: %v", err)
 	}

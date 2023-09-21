@@ -12,7 +12,7 @@ func GetOrdersIDProvider(db *sql.DB) (models.IDProviderOrdersParams, error) {
 		IDOrders               []models.IDOrder
 	)
 
-	orders, _ := GetAllOrdersDB(db)
+	orders, _ := GetAllOrdersDB(db, "Indonesia")
 	for _, order := range orders {
 		IDOrder := FormatDbToID(db, order)
 

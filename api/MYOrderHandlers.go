@@ -12,7 +12,7 @@ func GetOrdersMYProvider(db *sql.DB) (models.MYProviderOrdersParams, error) {
 		MYOrders               []models.MYOrder
 	)
 
-	orders, _ := GetAllOrdersDB(db)
+	orders, _ := GetAllOrdersDB(db, "Malaysia")
 	for _, order := range orders {
 		MYOrder := FormatDbToMY(db, order)
 		MYOrders = append(MYOrders, MYOrder)

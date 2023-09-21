@@ -12,7 +12,7 @@ func GetOrdersAdmin(db *sql.DB) (models.AdminOrdersParams, error) {
 		adminOrders       []models.AdminOrder
 	)
 
-	orders, _ := GetAllOrdersDB(db)
+	orders, _ := GetAllOrdersDB(db, "None")
 	for _, order := range orders {
 		adminOrder := FormatDbToAdmin(db, order)
 		adminOrders = append(adminOrders, adminOrder)
