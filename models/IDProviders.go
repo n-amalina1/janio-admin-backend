@@ -10,6 +10,7 @@ type IDOrder struct {
 	OrderWidth           float64  `json:"order_width"`
 	OrderHeight          float64  `json:"order_height"`
 	OrderWeight          float64  `json:"order_weight"`
+	OrderStatus          string   `json:"order_status"`
 	ConsigneeName        string   `json:"consignee_name"`
 	ConsigneePhoneNumber string   `json:"consignee_number"`
 	ConsigneeCountry     string   `json:"consignee_country"`

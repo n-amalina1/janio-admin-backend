@@ -30,7 +30,7 @@ func FormatDbToMY(db *sql.DB, order models.GetOrderDBParams) models.MYOrder {
 
 	MYPickup := models.Pickup{PickupID: order.PickupID, PickupName: order.PickupName, PickupPhoneNumber: order.PickupPhoneNumber, PickupCountry: order.PickupCountry, PickupAddress: order.PickupAddress, PickupPostal: order.PickupPostal, PickupState: order.PickupState, PickupCity: order.PickupCity, PickupProvince: order.PickupProvince}
 
-	MYOrderDetails := models.MYOrderDetails{OrderLength: order.OrderLength, OrderWidth: order.OrderWidth, OrderHeight: order.OrderHeight, OrderWeight: order.OrderWeight, Consignee: MYConsignee, Pickup: MYPickup}
+	MYOrderDetails := models.MYOrderDetails{OrderLength: order.OrderLength, OrderWidth: order.OrderWidth, OrderHeight: order.OrderHeight, OrderWeight: order.OrderWeight, OrderStatus: order.OrderStatus, Consignee: MYConsignee, Pickup: MYPickup}
 	MYOrder.OrderDetails = MYOrderDetails
 
 	var MYItems []models.MYItem

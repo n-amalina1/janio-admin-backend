@@ -30,6 +30,7 @@ func FormatDbToID(db *sql.DB, order models.GetOrderDBParams) models.IDOrder {
 	IDOrder.OrderWidth = order.OrderWidth
 	IDOrder.OrderHeight = order.OrderHeight
 	IDOrder.OrderWeight = order.OrderWeight
+	IDOrder.OrderStatus = order.OrderStatus
 	IDOrder.ConsigneeName = order.ConsigneeName
 	IDOrder.ConsigneePhoneNumber = order.ConsigneePhoneNumber
 	IDOrder.ConsigneeCountry = order.ConsigneeCountry
